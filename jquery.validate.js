@@ -226,7 +226,6 @@ $.extend($.validator, {
 		ignoreTitle: false,
 		onfocusin: function( element, event ) {
 			this.lastActive = element;
-
 			// hide error label and remove error class on focus if enabled
 			if ( this.settings.focusCleanup && !this.blockFocusCleanup ) {
 				if ( this.settings.unhighlight ) {
@@ -234,11 +233,17 @@ $.extend($.validator, {
 				}
 				this.addWrapper(this.errorsFor(element)).hide();
 			}
+			if($(element).hasClass('highlight-success') || $(element).hasClass('highlight-error')){
+	       return;
+	    }else{
+	      $(element).closest('.form-group').find('.note').show();
+	    }
 		},
 		onfocusout: function( element, event ) {
 			if ( !this.checkable(element) && (element.name in this.submitted || !this.optional(element)) ) {
 				this.element(element);
 			}
+			//$(element).closest('.form-group').find('.note').hide()
 		},
 		onkeyup: function( element, event ) {
 			if ( event.which === 9 && this.elementValue(element) === "" ) {
@@ -288,7 +293,7 @@ $.extend($.validator, {
 		number: "请输入有效的数字。",
 		digits: "Please enter only digits.",
 		creditcard: "请输入有效的信用卡号。",
-		equalTo: "请确认两次输入一致。",
+		equalTo: "输入不一致。",
 		maxlength: $.validator.format("请输入{0}以下的字符。"),
 		minlength: $.validator.format("请输入{0}以上个字符。"),
 		rangelength: $.validator.format("请输入{0}至{1}个字符。"),
@@ -298,7 +303,9 @@ $.extend($.validator, {
 		mobile: "请输入正确的手机号。",
 		alipay: "请输入支付宝注册的邮箱或手机号。",
 		IDNum: "请输入正确的身份证号。",
-		QQNum: "请输入正确的QQ号。"
+		QQNum: "请输入正确的QQ号。",
+		nameLength: "5-25个字符，一个汉字为两个字符",
+		MobileEmail: "您输入的手机号或邮箱格式不正确"
 	},
 
 	autoCreateRanges: false,
@@ -665,6 +672,8 @@ $.extend($.validator, {
 				}
 			}
 			this.toHide = this.toHide.not( this.toShow );
+			//hide .note
+			$('.note').hide()
 			this.hideErrors();
 			this.addWrapper( this.toShow ).show();
 		},
@@ -1175,6 +1184,29 @@ $.extend($.validator, {
 			}, param));
 			return "pending";
 		},
+		//username
+		nameLength:function(value,element,param){
+			function inputByteLenght(str){
+          var len = str.length;
+          var byteLen = 0;
+          if(len){
+            for(var i=0; i<len; i++){
+              if(str.charCodeAt(i)>255){
+                byteLen += 2;
+              }else{
+                byteLen ++;
+              }
+            }
+          }
+          return byteLen;
+        }
+        var length = inputByteLenght(value);
+        if(length<param[0] || length>param[1]){
+          return false;
+        }else{
+          return true;
+        }
+		},
 
 		//手机号
 		mobile:function(value,element){
@@ -1195,7 +1227,6 @@ $.extend($.validator, {
 		QQNum:function(value,element){
 			return /^\s*[.0-9]{5,10}\s*$/.test(value);
 		}
-
 	}
 
 });
